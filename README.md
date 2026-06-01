@@ -87,23 +87,51 @@ LG Aimers 과정과 연결해 정리한 개인 학습 노트입니다.
 - fallback 모델이나 재시도 전략이 필요한가
 - 모델 교체 시 운영 복잡도가 얼마나 늘어나는가
 
-## Planned Repository Structure
+## Repository Structure
 
 ```text
 .
 ├── README.md
-├── notes/
-│   ├── 00-llm-basics.md
-│   ├── 01-quantization.md
-│   ├── 02-distillation.md
-│   └── 03-evaluation.md
-├── experiments/
-│   ├── baseline.md
-│   ├── int8.md
-│   └── w8a8.md
-└── reports/
-    └── lightweighting-retrospective.md
+├── scripts/
+│   └── submit_w8a8_only.py
+├── notebooks/
+│   ├── phase2_true_smoothquant_w8a8.ipynb
+│   ├── colab_mixed_precision_quantization.ipynb
+│   ├── colab_awq_setup_final.ipynb
+│   ├── colab_smoothquant_w8a8.ipynb
+│   └── colab_smoothquant_w8a8_ignore_embed_only.ipynb
+└── docs/
+    └── experiment-notes.md
 ```
+
+## Code Artifacts
+
+### `scripts/submit_w8a8_only.py`
+
+대표 실행 스크립트입니다. EXAONE 4.0 1.2B 모델을 로드하고, MANTA-1M 일부 샘플로 calibration을 수행한 뒤 `llmcompressor`의 `QuantizationModifier`를 사용해 W8A8 양자화를 적용합니다.
+
+핵심 설정은 다음과 같습니다.
+
+- model: `LGAI-EXAONE/EXAONE-4.0-1.2B`
+- dataset: `LGAI-EXAONE/MANTA-1M`
+- calibration samples: `256`
+- max sequence length: `512`
+- scheme: `W8A8`
+- targets: `Linear`
+- ignore: `embed_tokens`, `lm_head`
+- output: `./model`, `submit.zip`
+
+### Notebooks
+
+노트북은 실험 탐색과 제출 경로를 정리한 기록입니다. 공개 전 모든 notebook output, execution count, widget metadata를 제거했습니다.
+
+- `phase2_true_smoothquant_w8a8.ipynb`: baseline W8A8과 SmoothQuant 변형을 같은 harness에서 비교하기 위한 노트북
+- `colab_mixed_precision_quantization.ipynb`: SmoothQuant W8A8과 GPTQ W4A8 혼합 정밀도 탐색
+- `colab_awq_setup_final.ipynb`: llmcompressor 기반 AWQ-style 양자화 실험
+- `colab_smoothquant_w8a8.ipynb`: SmoothQuant + W8A8 기본 실험
+- `colab_smoothquant_w8a8_ignore_embed_only.ipynb`: embedding/lm head 제외 조건을 명시한 W8A8 실험
+
+자세한 정리는 [`docs/experiment-notes.md`](./docs/experiment-notes.md)에 남겼습니다.
 
 ## Portfolio Context
 
